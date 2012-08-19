@@ -46,18 +46,14 @@ func Format(format string, t time.Time) string {
 		if len(chunk) == 0 {
 			continue
 		}
-		layoutCmd, ok := conversion[chunk[0:1]]
-		if ok {
+		if layoutCmd, ok := conversion[chunk[0:1]]; ok {
 			layout = append(layout, layoutCmd)
 			if len(chunk) > 1 {
 				layout = append(layout, chunk[1:])
 			}
 		} else {
-			layout = append(layout, "%")
-			layout = append(layout, chunk)
+			layout = append(layout, "%", chunk)
 		}
 	}
 	return t.Format(strings.Join(layout, ""))
 }
-
-
