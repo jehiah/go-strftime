@@ -1,8 +1,8 @@
 package strftime
 
 import (
-	"time"
 	"strings"
+	"time"
 )
 
 // taken from time/format.go
