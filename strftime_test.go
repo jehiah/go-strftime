@@ -2,13 +2,14 @@ package strftime
 
 import (
 	"time"
-	"testing"
+	"fmt"
 )
 
-func TestFormat(t *testing.T) {
-	tt := time.Unix(1340244776, 0)
-	f := Format("%Y-%m-%d %H:%M:%S", tt)
-	if f != "2012-06-20 22:12:56" {
-		t.Errorf("got %s", f)
-	}
+func ExampleFormat() {
+	t := time.Unix(1340244776, 0)
+	utc, _ := time.LoadLocation("UTC")
+	t = t.In(utc)
+	fmt.Println(Format("%Y-%m-%d %H:%M:%S", t))
+	// Output:
+	// 2012-06-21 02:12:56
 }
