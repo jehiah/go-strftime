@@ -1,3 +1,4 @@
+// go implementation of strftime
 package strftime
 
 import (
