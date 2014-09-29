@@ -7,33 +7,33 @@ import (
 )
 
 // taken from time/format.go
-var conversion = map[string]string {
-	/*stdLongMonth      */ "B":"January",
-	/*stdMonth          */ "b": "Jan",
-	// stdNumMonth       */ "m": "1",
-	/*stdZeroMonth      */ "m": "01",
-	/*stdLongWeekDay    */ "A": "Monday",
-	/*stdWeekDay        */ "a": "Mon",
-	// stdDay            */ "d": "2",
-	// stdUnderDay       */ "d": "_2",
-	/*stdZeroDay        */ "d": "02",
-	/*stdHour           */ "H": "15",
-	// stdHour12         */ "I": "3",
-	/*stdZeroHour12     */ "I": "03",
-	// stdMinute         */ "M": "4",
-	/*stdZeroMinute     */ "M": "04",
-	// stdSecond         */ "S": "5",
-	/*stdZeroSecond     */ "S": "05",
-	/*stdLongYear       */ "Y": "2006",
-	/*stdYear           */ "y": "06",
-	/*stdPM             */ "p": "PM",
-	// stdpm             */ "p": "pm",
-	/*stdTZ             */ "Z": "MST",
-	// stdISO8601TZ      */ "z": "Z0700",  // prints Z for UTC
-	// stdISO8601ColonTZ */ "z": "Z07:00", // prints Z for UTC
-	/*stdNumTZ          */ "z": "-0700",  // always numeric
-	// stdNumShortTZ     */ "b": "-07",    // always numeric
-	// stdNumColonTZ     */ "b": "-07:00", // always numeric
+var conversion = map[rune]string {
+	/*stdLongMonth      */ 'B':"January",
+	/*stdMonth          */ 'b': "Jan",
+	// stdNumMonth       */ 'm': "1",
+	/*stdZeroMonth      */ 'm': "01",
+	/*stdLongWeekDay    */ 'A': "Monday",
+	/*stdWeekDay        */ 'a': "Mon",
+	// stdDay            */ 'd': "2",
+	// stdUnderDay       */ 'd': "_2",
+	/*stdZeroDay        */ 'd': "02",
+	/*stdHour           */ 'H': "15",
+	// stdHour12         */ 'I': "3",
+	/*stdZeroHour12     */ 'I': "03",
+	// stdMinute         */ 'M': "4",
+	/*stdZeroMinute     */ 'M': "04",
+	// stdSecond         */ 'S': "5",
+	/*stdZeroSecond     */ 'S': "05",
+	/*stdLongYear       */ 'Y': "2006",
+	/*stdYear           */ 'y': "06",
+	/*stdPM             */ 'p': "PM",
+	// stdpm             */ 'p': "pm",
+	/*stdTZ             */ 'Z': "MST",
+	// stdISO8601TZ      */ 'z': "Z0700",  // prints Z for UTC
+	// stdISO8601ColonTZ */ 'z': "Z07:00", // prints Z for UTC
+	/*stdNumTZ          */ 'z': "-0700",  // always numeric
+	// stdNumShortTZ     */ 'b': "-07",    // always numeric
+	// stdNumColonTZ     */ 'b': "-07:00", // always numeric
 }
 
 // This is an alternative to time.Format because no one knows 
@@ -41,20 +41,31 @@ var conversion = map[string]string {
 // this takes standard strftime format options. For a complete list
 // of format options see http://strftime.org/
 func Format(format string, t time.Time) string {
-	formatChunks := strings.Split(format, "%")
-	var layout []string
-	for _, chunk := range formatChunks {
-		if len(chunk) == 0 {
-			continue
+	retval := make([]byte, 0, len(format))
+	for i, ni := 0, 0; i < len(format); i = ni + 2 {
+		ni = strings.IndexByte(format[i:], '%')
+		if ni < 0 {
+			ni = len(format)
+		} else {
+			ni += i
 		}
-		if layoutCmd, ok := conversion[chunk[0:1]]; ok {
-			layout = append(layout, layoutCmd)
-			if len(chunk) > 1 {
-				layout = append(layout, chunk[1:])
+		retval = append(retval, []byte(format[i:ni])...)
+		if ni + 1 < len(format) {
+			c := format[ni + 1]
+			if c == '%' {
+				retval = append(retval, '%')
+			} else {
+				if layoutCmd, ok := conversion[rune(c)]; ok {
+					retval = append(retval, []byte(t.Format(layoutCmd))...)
+				} else {
+					retval = append(retval, '%', c)
+				}
 			}
 		} else {
-			layout = append(layout, "%", chunk)
+			if ni < len(format) {
+				retval = append(retval, '%')
+			}
 		}
 	}
-	return t.Format(strings.Join(layout, ""))
+	return string(retval)
 }
