@@ -37,7 +37,7 @@ func TestUnsupported(t *testing.T) {
 	}
 }
 
-func TestRubyStftime(t *testing.T) {
+func TestRubyStrftime(t *testing.T) {
 	tm := time.Unix(1340244776, 0)
 	utc, _ := time.LoadLocation("UTC")
 	tm = tm.In(utc)
